@@ -5,11 +5,16 @@ import {
   View,
   TouchableOpacity,
   AsyncStorage,
-  FlatList
+  FlatList,
+  Image
 } from "react-native";
+import("react-native-firebase")
 import LevelItem from "LaserDawn/LevelItem";
+import RNGooglePlayGameServices from 'react-native-google-play-game-services';
+
 
 export default class App extends Component {
+  
   constructor(props) {
     super(props);
     this.state = {
@@ -20,6 +25,7 @@ export default class App extends Component {
       highscore: 60,
       theme: 1,
       round: 1,
+      againButtonText: "Again",
       mode: "oneRound",
       fiveRoundTimes: [],
       levelTime: 0.6,
@@ -44,7 +50,7 @@ export default class App extends Component {
         { levelNumber: 17, key: "17", time: 0.02, completed: false },
         { levelNumber: 18, key: "18", time: 0.01, completed: false },
         { levelNumber: 19, key: "19", time: 0.005, completed: false },
-        { levelNumber: 20, key: "20", time: 0.001, completed: false }
+        { levelNumber: 20, key: "20", time: 0, completed: false }
       ]
     };
   }
@@ -125,7 +131,20 @@ export default class App extends Component {
     });
   };
   componentDidMount = () => {
-    this.retrieveHighscore();
+   console.warn('blllll')
+    RNGooglePlayGameServices.signInSilently()
+    .then((msg) => {
+        console.warn(msg)
+    })
+    .catch((msg) => {
+      console.warn(msg)
+
+        //silent sign in didn't work so show the dialog instead
+        //note probably should catch errors here
+        RNGooglePlayGameServices.signInIntent();
+    });        
+    
+        this.retrieveHighscore();
     this.retrieveTheme();
     this.retrieveLevels();
   };
@@ -200,10 +219,13 @@ export default class App extends Component {
           var diff = (this.state.endTime - this.state.startTime) / 1000 + " s";
           if (this.state.mode === "story") {
             if (
-              (this.state.endTime - this.state.startTime) / 1000 <
+              (this.state.endTime - this.state.startTime) / 1000 <=
               this.state.levelTime
             ) {
-              this.setState({ levelEndStatus: "Success!" });
+              this.setState({
+                levelEndStatus: "Success!",
+                againButtonText: "Next Level"
+              });
               var levels = this.state.levels;
 
               if (
@@ -307,7 +329,7 @@ export default class App extends Component {
               fontWeight: "bold",
               color: "#a8a8a8",
               fontSize: 25,
-              margin: 20,
+              margin: 15,
               textAlign: "center"
             }}
           >
@@ -322,7 +344,7 @@ export default class App extends Component {
               fontWeight: "bold",
               color: "#a8a8a8",
               fontSize: 25,
-              margin: 20,
+              margin: 15,
               textAlign: "center"
             }}
           >
@@ -337,7 +359,7 @@ export default class App extends Component {
               fontWeight: "bold",
               color: "#a8a8a8",
               fontSize: 25,
-              margin: 20,
+              margin: 15,
               textAlign: "center"
             }}
           >
@@ -354,7 +376,7 @@ export default class App extends Component {
               fontWeight: "bold",
               color: "#a8a8a8",
               fontSize: 25,
-              margin: 20,
+              margin: 15,
               textAlign: "center"
             }}
           >
@@ -370,7 +392,7 @@ export default class App extends Component {
                 fontWeight: "bold",
                 color: "black",
                 fontSize: 25,
-                margin: 20,
+                margin: 15,
                 textAlign: "center"
               }}
             >
@@ -386,7 +408,7 @@ export default class App extends Component {
                 fontWeight: "bold",
                 color: "black",
                 fontSize: 25,
-                margin: 20,
+                margin: 15,
                 textAlign: "center"
               }}
             >
@@ -402,7 +424,7 @@ export default class App extends Component {
                 fontWeight: "bold",
                 color: "black",
                 fontSize: 25,
-                margin: 20,
+                margin: 15,
                 textAlign: "center"
               }}
             >
@@ -414,6 +436,12 @@ export default class App extends Component {
 
       var view = (
         <View style={styles.containerCentered}>
+          <Image
+            style={[{ height: 125, width: 256 }, styles.banner]}
+            resizeMode={"contain"}
+            source={{ uri: "speedreact_banner" }}
+          />
+
           <TouchableOpacity
             style={styles.profileButton}
             onPress={() => this.setState({ gameStarted: "profile" })}
@@ -536,11 +564,20 @@ export default class App extends Component {
       }
       var view = (
         <View style={styles.containerCentered}>
+          <Image
+            style={[{ height: 125, width: 256 }, styles.banner]}
+            resizeMode={"contain"}
+            source={{ uri: "speedreact_banner" }}
+          />
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => {
               if (this.state.mode === "story") {
-                this.setState({ gameStarted: "story", mode: "oneRound" });
+                this.setState({
+                  gameStarted: "story",
+                  mode: "oneRound",
+                  againButtonText: "Again"
+                });
               } else {
                 this.setState({ gameStarted: false });
               }
@@ -581,10 +618,18 @@ export default class App extends Component {
           <TouchableOpacity
             style={styles.playButton}
             onPress={() => {
-              this.startGame();
+              if (this.state.againButtonText === "Again") {
+                this.startGame();
+              } else if (this.state.againButtonText === "Next Level") {
+                this.setState({
+                  gameStarted: "story",
+                  mode: "oneRound",
+                  againButtonText: "Again"
+                });
+              }
             }}
           >
-            <Text style={styles.text}>Again</Text>
+            <Text style={styles.text}>{this.state.againButtonText}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -843,6 +888,12 @@ export default class App extends Component {
 
       var view = (
         <View style={styles.containerCentered}>
+          <Image
+            style={[{ height: 125, width: 256 }, styles.banner]}
+            resizeMode={"contain"}
+            source={{ uri: "speedreact_banner" }}
+          />
+
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => this.setState({ gameStarted: false })}
@@ -972,6 +1023,11 @@ const styles = StyleSheet.create({
     margin: 10,
     top: 6,
     left: 0
+  },
+  banner: {
+    position: "absolute",
+    marginTop: 40,
+    top: 6
   },
 
   backButtonLevel: {

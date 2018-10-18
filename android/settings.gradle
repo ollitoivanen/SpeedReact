@@ -1,3 +1,9 @@
 rootProject.name = 'LaserDawn'
+include ':react-native-google-play-game-services'
+project(':react-native-google-play-game-services').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-google-play-game-services/android')
+include ':react-native-firebase'
+project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')
+include ':react-native-firebase'
+project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')
 
 include ':app'

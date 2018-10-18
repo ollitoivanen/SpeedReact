@@ -101,8 +101,8 @@ android {
         applicationId "com.laserdawn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.0.2"
+        versionCode 5
+        versionName "1.0.3"
 
     }
     splits {
@@ -132,9 +132,20 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-google-play-game-services')
+    implementation project(':react-native-firebase')
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation "com.facebook.react:react-native:0.57"
+    implementation "com.google.android.gms:play-services-base:16.0.1"
+    implementation "com.google.android.gms:play-services-games:16.0.0"
+    implementation "com.google.android.gms:play-services-auth:16.0.1"
+    implementation "com.google.firebase:firebase-auth:16.0.4"
+
+
+
+    implementation 'com.google.firebase:firebase-core:16.0.4'
+    // From node_modules
 }
 
 // Run this once to be able to run the application with BUCK
@@ -143,3 +154,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
 }
+apply plugin: 'com.google.gms.google-services'
